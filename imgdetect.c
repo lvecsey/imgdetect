@@ -116,7 +116,8 @@ int repaint_inputs(imgdetect_t *id, pixel_t *rgb, long int num_pixels) {
   for (n = 0; n < id->num_input; n++) {
 
     id->inputs[n].sum = 0.5 * rgb[n*num_pixels/id->num_input].r / 65535.0;
-
+    id->inputs[n].output = sigmoid(id->inputs[n].sum);
+    
   }
 
   return 0;
@@ -601,7 +602,7 @@ int main(int argc, char *argv[]) {
 
   enum { NONE, LARGE_NN, MEDIUM_NN, SMALL_NN };
 
-  long int neuralnet_size = MEDIUM_NN;
+  long int neuralnet_size = SMALL_NN;
   
   if (neuralnet_size == LARGE_NN) {
     id.num_input = 4903;
