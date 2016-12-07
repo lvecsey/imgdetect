@@ -78,8 +78,10 @@ double square(double x) { return x * x; }
 
 int show_inputsummary(imgdetect_t *id, long int span);
 int show_weightpack1(imgdetect_t *id, long int span);
+int show_gradient1(imgdetect_t *id, long int span); 
 int show_hiddensummary(imgdetect_t *id, long int span);
 int show_weightpack2(imgdetect_t *id, long int span);
+int show_gradient2(imgdetect_t *id, long int span); 
 int show_outputsummary(imgdetect_t *id, long int span);
 int show_expected(imgdetect_t *id, long int span);
 
@@ -411,8 +413,10 @@ int process_dir(struct pdir *base, imgdetect_t *id, double *mse, uint8_t *gray, 
     long int span = 7;
     show_inputsummary(id, span);
     show_weightpack1(id, span);
+    show_gradient1(id, span);
     show_hiddensummary(id, span);
     show_weightpack2(id, span);    
+    show_gradient2(id, span);
     show_outputsummary(id, span);
     show_expected(id, span);
   }
@@ -461,8 +465,10 @@ int test_filename(imgdetect_t *id, char *filename) {
 
   show_inputsummary(id, 10);
   show_weightpack1(id, 10);
+  show_gradient1(id, 10);
   show_hiddensummary(id, 10);
   show_weightpack2(id, 10);
+  show_gradient2(id, 10);
   show_outputsummary(id, 10);
   
   printf("Matched a %s\n", id->output.output >= 0.80 ? "face" : "motorcycle");
@@ -497,6 +503,29 @@ int show_weightpack1(imgdetect_t *id, long int span) {
   
 }
 
+int show_gradient1(imgdetect_t *id, long int span) {
+
+  long int j;
+  
+  long int i;
+  
+  long int n;
+
+  long int jspan_incr = id->num_hidden / span;
+  
+  for (j = 0; j < id->num_hidden; j+=jspan_incr) {
+    for (i = 0; i < span; i++) {
+      n = i * id->num_input / span;
+      printf("%g ", id->weights1[j*id->num_input+n].gradient);
+    }
+  }
+
+  putchar('\n');
+
+  return 0;
+  
+}
+
 int show_weightpack2(imgdetect_t *id, long int span) {
 
   long int j = 0;
@@ -506,6 +535,23 @@ int show_weightpack2(imgdetect_t *id, long int span) {
   for (j = 0; j < span; j++) {
     n = j * id->num_hidden / span;
     printf("%g ", id->weights2[n].weight);
+  }
+
+  putchar('\n');
+
+  return 0;
+  
+}
+
+int show_gradient2(imgdetect_t *id, long int span) {
+
+  long int j = 0;
+
+  long int n;
+  
+  for (j = 0; j < span; j++) {
+    n = j * id->num_hidden / span;
+    printf("%g ", id->weights2[n].gradient);
   }
 
   putchar('\n');
