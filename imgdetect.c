@@ -140,6 +140,7 @@ int rerun_network(imgdetect_t *id) {
     }
 
     id->hidden[j].sum = sum;
+    id->hidden[j].output = sigmoid(sum);
     
   }
 
