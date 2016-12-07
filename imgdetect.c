@@ -178,6 +178,24 @@ int plot_mse(uint8_t *gray, long int xres, long int yres, double mse, long int i
 
 }
 
+int setprevious_deltas(imgdetect_t *id) {
+
+  long int n;
+
+  id->output.previous_delta = id->output.delta;
+
+  for (n = 0; n < id->num_hidden; n++) {
+    id->hidden[n].previous_delta = id->hidden[n].delta;
+  }
+
+  for (n = 0; n < id->num_input; n++) {
+    id->inputs[n].previous_delta = id->inputs[n].delta;
+  }
+
+  return 0;
+  
+}
+
 double calc_sum(imgdetect_t *id, long int i, weight_t *weights) {
 
   long int j;
@@ -269,6 +287,8 @@ int run_training(imgdetect_t *id, double *mse, long int fileno, long int num_fil
   }
 
   id->output.delta = delta;
+
+  setprevious_deltas(id);
   
   return 0;
 
