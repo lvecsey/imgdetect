@@ -536,6 +536,8 @@ int show_inputsummary(imgdetect_t *id, long int span) {
   long int j = 0;;
 
   long int n;
+
+  printf("input: ");
   
   for (j = 0; j < span; j++) {
     n = j * id->num_input / span;
@@ -553,6 +555,8 @@ int show_hiddensummary(imgdetect_t *id, long int span) {
   long int j = 0;;
 
   long int n;
+
+  printf("hidden: ");
   
   for (j = 0; j < span; j++) {
     n = j * id->num_hidden / span;
