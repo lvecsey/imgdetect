@@ -200,7 +200,24 @@ int setprevious_deltas(imgdetect_t *id) {
   
 }
 
-double calc_sum(imgdetect_t *id, long int i, weight_t *weights) {
+double calc_sumA(imgdetect_t *id, long int j, weight_t *weights) {
+
+  long int i;
+  
+  double sum = 0.0;
+  
+  for (i = 0; i < id->num_input; i++) {
+  
+    sum += weights[j*id->num_input+i].weight;
+
+  }
+
+  return sum;
+  
+}
+
+
+double calc_sumB(imgdetect_t *id, long int i, weight_t *weights) {
 
   long int j;
     
@@ -264,13 +281,17 @@ int run_training(imgdetect_t *id, double *mse, long int fileno, long int num_fil
     gray[ypos*xres/8+xpos/8] &= ~(1<<(7-(xpos%8)));
     
   }
-	
+
+  for (j = 0; j < id->num_hidden; j++) {
+
+    sum = calc_sumB(id, i, id->weights1);
+    id->hidden[j].delta = sigmoid_deriv(id->hidden[j].sum) * sum * delta;
+    
+  }
+  
   for (j = 0; j < id->num_hidden; j++) {
 	  
     for (i = 0; i < id->num_input; i++) {
-
-      sum = calc_sum(id, i, id->weights1);
-      id->hidden[j].delta = sigmoid_deriv(id->hidden[j].sum) * sum * delta;
 
       gradient = sigmoid(id->hidden[j].sum) * id->output.delta;
 
