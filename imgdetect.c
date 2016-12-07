@@ -152,10 +152,10 @@ int rerun_network(imgdetect_t *id) {
     sum += id->hidden[i].output * id->weights2[i].weight;
 
   }
-  
+
   id->output.sum = sum;
   id->output.output = sigmoid(sum);
-  
+
   return 0;
 
 }
@@ -687,13 +687,13 @@ int main(int argc, char *argv[]) {
     for (n = 0; n < id.num_input * id.num_hidden; n++) {
       bytes_read = read(rnd_fd, &rnd, sizeof(uint64_t));
       if (bytes_read != sizeof(uint64_t)) return -1;
-      id.weights1[n].weight = 2000.0 * rnd / 18446744073709551615.0 - 1000.0;
+      id.weights1[n].weight = 5.0 * rnd / 18446744073709551615.0 - 2.5;
     }
 
     for (n = 0; n < id.num_hidden * id.num_output; n++) {
       bytes_read = read(rnd_fd, &rnd, sizeof(uint64_t));
       if (bytes_read != sizeof(uint64_t)) return -1;
-      id.weights2[n].weight = 2000.0 * rnd / 18446744073709551615.0 - 1000.0;
+      id.weights2[n].weight = 5.0 * rnd / 18446744073709551615.0 - 2.5;
     }
   }
   
