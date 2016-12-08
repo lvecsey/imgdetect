@@ -11,5 +11,5 @@ all : convert_imgs imgdetect
 convert_imgs : convert_imgs.o
 	$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
 
-imgdetect : imgdetect.o neuron.o
+imgdetect : imgdetect.o neuron.o kernel_apply.o
 	$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
