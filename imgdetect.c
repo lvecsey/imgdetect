@@ -23,6 +23,8 @@
 #include "neur2.h"
 #include "weight.h"
 
+#include "kernel_apply.h"
+
 double sigmoid_deriv(double x) {
   double sig = sigmoid(x);
   return sig * (1.0 - sig);
@@ -375,9 +377,13 @@ int process_dir(struct pdir *base, imgdetect_t *id, double *mse, uint8_t *gray, 
 
   void *m;
 
+  long int input_xres, input_yres;
+  
   long int fileno = 0;
   long int num_files = 100;
 
+  image_t output;
+  
   double sum;
   
   entry = base->next;
@@ -388,6 +394,14 @@ int process_dir(struct pdir *base, imgdetect_t *id, double *mse, uint8_t *gray, 
     
     printf("Opening %s for processing.. \n", entry->filename);
 
+    retval = sscanf(strrchr(entry->filename, '_'), "_%ldx%ld.rgb", &input_xres, &input_yres);
+
+    if (retval != 2) {
+      printf("Warning, retval for sscanf was %d\n", retval);
+      entry = entry->next;
+      continue;
+    }
+      
     fd = open(entry->filename, O_RDWR);
     if (fd == -1) {
       perror("open");
@@ -407,14 +421,22 @@ int process_dir(struct pdir *base, imgdetect_t *id, double *mse, uint8_t *gray, 
       return -1;
     }
 
-    rgb = (pixel_t*) m;
+    rgb = malloc(buf.st_size);
+    if (rgb==NULL) { perror("malloc"); return -1; }
+    
+    output.rgb = rgb;
+    output.xres = input_xres;
+    output.yres = input_yres;
+    retval = kernel_apply(m, kernel_edge1, 0.0, input_xres, input_yres, CHAN_RED, &output);
 
+    close(fd);
+    munmap(m, buf.st_size);
+    
     id->expected = entry->expected;
     
     repaint_inputs(id, rgb, num_pixels);
     
-    close(fd);
-    munmap(m, buf.st_size);
+    free(rgb);
     
     run_training(id, mse, fileno, num_files, gray, xres, yres);
 
@@ -453,19 +475,30 @@ int test_filename(imgdetect_t *id, char *filename) {
   pixel_t *rgb;
   long int num_pixels;
 
+  long int input_xres, input_yres;
+  
   struct stat buf;
   int retval;
 
   void *m;
 
+  image_t output;
+  
   printf("Testing %s against neural network.. \n", filename);
-    
+
+  retval = sscanf(strrchr(filename, '_'), "_%ldx%ld.rgb", &input_xres, &input_yres);
+
+  if (retval != 2) {
+    printf("Warning, retval for sscanf was %d\n", retval);
+    return -1;
+  }
+  
   fd = open(filename, O_RDWR);
   if (fd == -1) {
     perror("open");
     return -1;
   }
-
+  
   retval = fstat(fd, &buf);
   if (retval==-1) {
     perror("fstat");
@@ -479,9 +512,21 @@ int test_filename(imgdetect_t *id, char *filename) {
     return -1;
   }
 
-  rgb = (pixel_t*) m;
+  rgb = malloc(buf.st_size);
+  if (rgb==NULL) { perror("malloc"); return -1; }
+    
+  output.rgb = rgb;
+  output.xres = input_xres;
+  output.yres = input_yres;
+  retval = kernel_apply(m, kernel_edge1, 0.0, input_xres, input_yres, CHAN_RED, &output);
 
+  close(fd);
+  munmap(m, buf.st_size);
+  
   repaint_inputs(id, rgb, num_pixels);
+
+  free(rgb);
+  
   rerun_network(id);
 
   show_inputsummary(id, 10);
@@ -494,9 +539,6 @@ int test_filename(imgdetect_t *id, char *filename) {
   
   printf("Matched a %s\n", id->output.output >= 0.80 ? "face" : "motorcycle");
   
-  close(fd);
-  munmap(m, buf.st_size);
-
   return 0;
   
 }
