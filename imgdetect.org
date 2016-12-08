@@ -1,0 +1,1 @@
+* TODO set a training file that has all the weight_t and neur2_t structures
