@@ -74,7 +74,7 @@ long int count_items(struct pdir *base) {
 
 }
 
-#define NUM_ITERS 240
+#define NUM_ITERS 20
 
 double square(double x) { return x * x; }
 
@@ -253,8 +253,6 @@ int run_training(imgdetect_t *id, double *mse, uint8_t *gray, long int xres, lon
   double delta;
   double gradient;
   
-  rerun_network(id);
-
   ideal = id->expected;
   a = id->output.output;
 
@@ -436,10 +434,12 @@ int process_dir(struct pdir *base, imgdetect_t *id, double *mse, uint8_t *gray, 
     repaint_inputs(id, rgb, num_pixels);
     
     free(rgb);
-    
-    run_training(id, mse, gray, xres, yres);
+
+    rerun_network(id);
 
     sum += square(id->expected - id->output.output);
+    
+    run_training(id, mse, gray, xres, yres);
     
     entry = entry->next;
     
@@ -705,7 +705,7 @@ int main(int argc, char *argv[]) {
   char *dir1 = "traindata/motorcycle";
   char *dir2 = "traindata/faces";
 
-  imgdetect_t id = { .learning_rate = 0.22, .alpha_momentum = 0.30, .output.output = 0.5 };
+  imgdetect_t id = { .learning_rate = 0.15, .alpha_momentum = 0.475, .output.output = 0.5 };
   
   int retval;
 
@@ -749,13 +749,13 @@ int main(int argc, char *argv[]) {
     for (n = 0; n < id.num_input * id.num_hidden; n++) {
       bytes_read = read(rnd_fd, &rnd, sizeof(uint64_t));
       if (bytes_read != sizeof(uint64_t)) return -1;
-      id.weights1[n].weight = 5.0 * rnd / 18446744073709551615.0 - 2.5;
+      id.weights1[n].weight = 3.0 * rnd / 18446744073709551615.0 - 1.5;
     }
 
     for (n = 0; n < id.num_hidden * id.num_output; n++) {
       bytes_read = read(rnd_fd, &rnd, sizeof(uint64_t));
       if (bytes_read != sizeof(uint64_t)) return -1;
-      id.weights2[n].weight = 5.0 * rnd / 18446744073709551615.0 - 2.5;
+      id.weights2[n].weight = 3.0 * rnd / 18446744073709551615.0 - 1.5;
     }
   }
   
