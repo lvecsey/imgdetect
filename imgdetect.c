@@ -74,7 +74,7 @@ long int count_items(struct pdir *base) {
 
 }
 
-#define NUM_ITERS 5
+#define NUM_ITERS 240
 
 double square(double x) { return x * x; }
 
@@ -235,7 +235,7 @@ double calc_sumB(imgdetect_t *id, long int i, weight_t *weights) {
   
 }
 
-int run_training(imgdetect_t *id, double *mse, long int fileno, long int num_files, uint8_t *gray, long int xres, long int yres) {
+int run_training(imgdetect_t *id, double *mse, uint8_t *gray, long int xres, long int yres) {
 
   double sum;
 
@@ -380,7 +380,6 @@ int process_dir(struct pdir *base, imgdetect_t *id, double *mse, uint8_t *gray, 
   long int input_xres, input_yres;
   
   long int fileno = 0;
-  long int num_files = 100;
 
   image_t output;
   
@@ -438,7 +437,7 @@ int process_dir(struct pdir *base, imgdetect_t *id, double *mse, uint8_t *gray, 
     
     free(rgb);
     
-    run_training(id, mse, fileno, num_files, gray, xres, yres);
+    run_training(id, mse, gray, xres, yres);
 
     sum += square(id->expected - id->output.output);
     
